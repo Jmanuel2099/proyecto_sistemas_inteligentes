@@ -1,6 +1,9 @@
 #storage
 archivos/
 
+#Environment
+proyecto_sistemas_inteligentes/environment.py
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
