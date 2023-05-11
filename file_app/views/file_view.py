@@ -8,20 +8,21 @@ from file_app.services.handling_file.file import File
 class LoadFileView:
 
     def __init__(self) -> None:
-        pass
+        self.load_file_service = File()
 
     def _get_request_body(self, request):
         return json.loads(request.body)
     
+    # @require_POST
     @csrf_exempt
     def load_file(self, request):
-        # try:
         if request.FILES:
             file = request.FILES['file']
-            
-            load_file_service = File()
-            load_file_service.load_file(file)
+            self.load_file_service.load_file(file)
             
             return JsonResponse({"mensaje": "Archivo recibido exitosamente"})
-        # except:
-        #     return JsonResponse({"mensaje": "No se recibió ningún archivo"})
+
+    @csrf_exempt
+    def describe_file(self, request):
+        response = self.load_file_service.describe_data()
+        return JsonResponse(response)
