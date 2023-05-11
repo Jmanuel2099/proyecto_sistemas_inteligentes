@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -37,6 +38,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    # 'file_handling.apps.FileHandlingConfig'
+    'file_app.apps.FileAppConfig'
 ]
 
 MIDDLEWARE = [
@@ -125,3 +129,13 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# FileSystemStorage
+# the place where the files that enter by form or api to the application will be stored is configured.
+DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+if not os.path.exists(os.path.join(BASE_DIR, 'archivos')):
+    os.makedirs(os.path.join(BASE_DIR, 'archivos'))
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'archivos')
+MEDIA_URL = '/media/'
