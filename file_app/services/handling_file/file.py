@@ -40,5 +40,12 @@ class File:
         first_record_dict = self.data_frame.iloc[0].to_dict()
         return {key: type(value).__name__ for key, value in first_record_dict.items()}
 
+    def save_df_not_missing_data_in_local(self, folder_name):
+        path_excel_file = os.path.join(settings.MEDIA_ROOT,
+                                       folder_name,
+                                       f'{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.xlsx')
+        self.path = path_excel_file
+        self.data_frame_not_missing_data.to_excel(self.path)
+
     def _create_data_frame(self):
         self.set_data_frame(pd.read_excel(self.path))
