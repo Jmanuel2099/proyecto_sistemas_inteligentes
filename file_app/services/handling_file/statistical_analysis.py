@@ -27,9 +27,6 @@ class StatisticalAnalysis:
         num_columns = data_frame.select_dtypes(np.number).columns
         obj_columns = data_frame.select_dtypes(object).columns
 
-        print('number', num_columns)
-        print('obj', obj_columns)
-
         data_frame = self._average_imputation(data_frame, num_columns)
         data_frame = self._mode_imputation(data_frame, obj_columns)
 
@@ -38,14 +35,12 @@ class StatisticalAnalysis:
 
     def _average_imputation(self, data_frame, numeric_columns):
         for column in numeric_columns:
-            print('col_num', column)
             media = data_frame[column].mean()
             data_frame[column].fillna(media, inplace=True)
         return data_frame
 
     def _mode_imputation(self, data_frame, not_numeric_columns):
         for column in not_numeric_columns:
-            print('col_obj', column)
             mode = data_frame[column].mode()[0]
             data_frame[column].fillna(mode, inplace=True)
         return data_frame
