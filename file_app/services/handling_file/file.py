@@ -3,7 +3,6 @@ from django.conf import settings
 import os
 import pandas as pd
 from datetime import datetime
-from file_app.services.mongodb.insert_data import InsertData
 
 
 class File:
@@ -31,21 +30,37 @@ class File:
         self.path = new_path
 
     def save_file_in_local(self, file):
-        name_new_file = datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + '_' + file.name
-        name_new_file = default_storage.save(name_new_file, file)
-        self.set_path(os.path.join(settings.MEDIA_ROOT, name_new_file))
-        self._create_data_frame()
+        try:
+            name_new_file = datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + '_' + file.name
+            name_new_file = default_storage.save(name_new_file, file)
+            self.set_path(os.path.join(settings.MEDIA_ROOT, name_new_file))
+            self._create_data_frame()
+        except Exception as error:
+            raise error
 
     def describe_data(self):
-        first_record_dict = self.data_frame.iloc[0].to_dict()
-        return {key: type(value).__name__ for key, value in first_record_dict.items()}
+        try:
+            if self.data_frame is None:
+                # raise AttributeError("No document has been uploaded yet")
+                return None
+            
+            first_record_dict = self.data_frame.iloc[0].to_dict()
+            return {key: type(value).__name__ for key, value in first_record_dict.items()}
+        except Exception as error:
+            raise error
 
     def save_df_not_missing_data_in_local(self, folder_name):
-        path_excel_file = os.path.join(settings.MEDIA_ROOT,
+        try:
+            path_excel_file = os.path.join(settings.MEDIA_ROOT,
                                        folder_name,
                                        f'{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.xlsx')
-        self.path = path_excel_file
-        self.data_frame_not_missing_data.to_excel(self.path)
+            self.path = path_excel_file
+            self.data_frame_not_missing_data.to_excel(self.path)
+        except Exception as error:
+            raise error
 
     def _create_data_frame(self):
-        self.set_data_frame(pd.read_excel(self.path))
+        try:
+            self.set_data_frame(pd.read_excel(self.path))
+        except Exception as error: 
+            raise error
