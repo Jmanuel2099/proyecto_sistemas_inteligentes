@@ -12,6 +12,7 @@ class FileController:
     def __init__(self) -> None:
         self.file = File()
         self.respository = InsertData()
+        self.statisticalAnalysis = StatisticalAnalysis(self.file)
 
     def load_file(self, file):
         try:
@@ -23,23 +24,40 @@ class FileController:
 
     def describe_file(self):
         try:
+            if self.file.get_data_frame is None:
+                return None
+
             return self.file.describe_data()
         except Exception as error:
             raise error
 
     def process_missing_data(self, method):
         try:
-            statisticalAnalysis = StatisticalAnalysis(self.file)
+            if self.file.get_data_frame is None:
+                return None
+            # statisticalAnalysis = StatisticalAnalysis(self.file)
             if method == self.DESCARD_METHOD:
-                statisticalAnalysis.discard()
+                self.file.missing_data_by_discard()
                 self._load_data_in_respository(self.file.get_df_not_missing_data(),
                                             COLLECTION_DISCARDING)
             if method == self.AVERAGE_IMPUTATION_METHOD:
-                statisticalAnalysis.imputation()
+                self.file.missing_data_by_imputation()
                 self._load_data_in_respository(self.file.get_df_not_missing_data(),
                                             COLLECTION_AVERAGE_IMPUTATION)
         except Exception as error:
             raise error
+    def graphical_analysis(self):
+        try:
+            histograms = self.statisticalAnalysis.histograms()
+            correlation_matrix = self.statisticalAnalysis.correlation_matrix()
+
+            if histograms is None or correlation_matrix is None:
+                return None
+            return histograms, correlation_matrix
+
+        except Exception as error:
+            raise error
+
 
     def _load_data_in_respository(self, data_frame, collection):
         try:

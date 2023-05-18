@@ -57,10 +57,10 @@ class LoadFileView:
             return JsonResponse({'Error': '500 Internal Server Error'})
 
     @csrf_exempt
-    def statistical_analysis(self, request, method_id):
+    def missing_data(self, request, method_id):
         try:
             if (method_id != self.controller.AVERAGE_IMPUTATION_METHOD 
-                or method_id != self.controller.DESCARD_METHOD):
+                and method_id != self.controller.DESCARD_METHOD):
                 return JsonResponse(
                     {
                         'Error': '408 Time out',
@@ -69,6 +69,25 @@ class LoadFileView:
 
             self.controller.process_missing_data(method_id)
             return JsonResponse({"Message": "Method applied successfully."})
+        except Exception as error:
+            print(error)
+            return JsonResponse({'Error': '500 Internal Server Error'})
+    
+    @csrf_exempt
+    def graphical_statistical_analysis(self, request):
+        try:
+            response = self.controller.graphical_analysis()
+            if response is None:
+                return JsonResponse(
+                    {
+                        'Error': '424 Failed Dependency', 
+                        'Message': 'It is recommended to do the missing data treatment first.'
+                    })
+            return JsonResponse(
+                {
+                    'histograms':response[0],
+                    'correlation_matrix': response[1]
+                })
         except Exception as error:
             print(error)
             return JsonResponse({'Error': '500 Internal Server Error'})
