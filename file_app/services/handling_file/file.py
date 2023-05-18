@@ -94,7 +94,7 @@ class File:
             path_excel_file = os.path.join(path_folder,
                                         f'{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.xlsx')
             self.path = path_excel_file
-            self.data_frame_not_missing_data.to_excel(self.path)
+            self.data_frame_not_missing_data.to_excel(self.path, index=False)
         except Exception as error:
             raise error
 
