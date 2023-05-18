@@ -40,7 +40,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     # 'file_handling.apps.FileHandlingConfig'
-    'file_app.apps.FileAppConfig'
+    'file_app.apps.FileAppConfig',
+    'machine_learning_app.apps.MachineLearningAppConfig'
 ]
 
 MIDDLEWARE = [
