@@ -1,8 +1,8 @@
 import json
 from proyecto_sistemas_inteligentes.mongodb import COLLECTION_AVERAGE_IMPUTATION, COLLECTION_DISCARDING, COLLECTION_TEST_NAME
-from file_app.services.handling_file.file import File
-from file_app.services.mongodb.insert_data import InsertData
-from file_app.services.handling_file.statistical_analysis import StatisticalAnalysis
+from file_app.application.handling_file.file import File
+from file_app.application.mongodb.insert_data import InsertData
+from file_app.application.handling_file.statistical_analysis import StatisticalAnalysis
 
 
 class FileController:
