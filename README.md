@@ -116,3 +116,18 @@ Method: GET http://127.0.0.1:8000/file/graphicalanalysis
       "Error": "500 Internal Server Error"
   }
   ```
+## Training
+Method: POST http://127.0.0.1:8000/machine_learning/training
+- Request:
+```json
+{
+    "model_name" : "KNN",
+    "normalization" : "SS", // SS: Standar Scaler or MM: MinMax
+    "overfitting_underfitting": "HO", // HO:  Hold Out or CV: Cross Validation
+    "neighbors" : 3, // when using a knn model
+    "kernel": "", // when using a SVC model
+    "depth": "" // when using a decision_trees model
+}
+```
+
+- Response:
