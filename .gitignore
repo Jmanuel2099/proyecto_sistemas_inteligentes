@@ -1,8 +1,8 @@
 #storage
-archivos/
+received_files/
 
 #Environment
-proyecto_sistemas_inteligentes/environment.py
+preprocessing_service/data_base/mongo/mongo_credentials.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
