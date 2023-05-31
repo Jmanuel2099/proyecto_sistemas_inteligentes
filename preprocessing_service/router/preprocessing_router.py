@@ -7,13 +7,13 @@ from preprocessing_service.models.response.error_resposne import ErrorResposne
 from preprocessing_service.models.response.upload_file_response import UploadFileResponse
 from preprocessing_service.models.response.missing_data_response import MissingDataResponse
 from preprocessing_service.models.response.graphical_analysis_response import GraphicalAnalysisResponse
-# Controller
-from preprocessing_service.controllers.handling_file import HandlingFile
-from preprocessing_service.controllers.handling_statistics import HandlingStatistics
+# Handlers
+from preprocessing_service.handler.handling_file import HandlingFile
+from preprocessing_service.handler.handling_statistics import HandlingStatistics
 
 
-file_controller = HandlingFile()
-statistics_controller = HandlingStatistics(file_controller.get_file())
+file_handler = HandlingFile()
+statistics_handler = HandlingStatistics(file_handler.get_file())
 
 router = APIRouter(
     prefix="/preprocessing",
@@ -30,7 +30,7 @@ async def load_file(file: UploadFile, response: Response) -> Any:
             return ErrorResposne(error= status.HTTP_400_BAD_REQUEST, 
                                 message= "expect a file with .xlsx extension.")
             
-        resp = file_controller.save_file(file)
+        resp = file_handler.save_file(file)
         return UploadFileResponse(local_file_path=resp[0], docs_inserted_mongo=resp[1])
     except Exception as error:
         response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -40,7 +40,7 @@ async def load_file(file: UploadFile, response: Response) -> Any:
             response_model= Union[dict, ErrorResposne])
 async def describe_file(response: Response):
     try:
-        resp = file_controller.describe_file()
+        resp = file_handler.describe_file()
         if resp is None:
             response.status_code = status.HTTP_424_FAILED_DEPENDENCY
             return ErrorResposne(error= status.HTTP_424_FAILED_DEPENDENCY, 
@@ -54,7 +54,7 @@ async def describe_file(response: Response):
             response_model= Union[MissingDataResponse, ErrorResposne])
 async def missing_data(method_id: MissingDataOptions, response: Response):
     try:
-        resp = file_controller.process_missing_data(method_id)
+        resp = file_handler.process_missing_data(method_id)
         if resp is None:
             response.status_code = status.HTTP_424_FAILED_DEPENDENCY
             return ErrorResposne(error= status.HTTP_424_FAILED_DEPENDENCY, 
@@ -69,7 +69,7 @@ async def missing_data(method_id: MissingDataOptions, response: Response):
             response_model= Union[GraphicalAnalysisResponse, ErrorResposne] )
 async def graphical_statistical_analysis(response: Response):
     try:
-        resp = statistics_controller.graphical_analysis()
+        resp = statistics_handler.graphical_analysis()
         if resp is None:
             response.status_code = status.HTTP_424_FAILED_DEPENDENCY
             return ErrorResposne(error= status.HTTP_424_FAILED_DEPENDENCY, 
