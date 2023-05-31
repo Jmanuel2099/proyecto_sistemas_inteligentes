@@ -5,8 +5,7 @@ from datetime import datetime
 
 
 class File:
-    
-    BASE_DIR = "C:\\Users\\jmanu\\PersonalProjects\\proyecto_sistemas_inteligentes_fast\\received_files"
+    BASE_DIR = "received_files"
     FOLDER_TO_SAVE_NEW_FILES = "new_files"
     DATAFRAME_FOLDER_WITH_DESCARD = 'dataframa_with_descard'
     DATAFRAME_FOLDER_WITH_AVERAGE_IMPUTATION = 'dataframa_with_average_imputation'
