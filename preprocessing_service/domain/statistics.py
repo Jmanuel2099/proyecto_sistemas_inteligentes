@@ -1,3 +1,4 @@
+from preprocessing_service.domain.file import FileSingleton
 import os
 from datetime import datetime
 import matplotlib.pyplot as plt
@@ -9,8 +10,11 @@ class Statistics:
     HISTOGRAMS_FOLDER = 'histograms'
     CORRELATION_MATRIX_FOLDER=' correlation_matrix'
 
-    def __init__(self, file) -> None:
-        self.file = file
+    # def __init__(self, file) -> None:
+    #     self.file = file
+
+    def __init__(self) -> None:
+        self.file = FileSingleton()
 
     def histograms(self):
         try:

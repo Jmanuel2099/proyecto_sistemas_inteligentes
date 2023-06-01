@@ -13,7 +13,8 @@ from preprocessing_service.handler.handling_statistics import HandlingStatistics
 
 
 file_handler = HandlingFile()
-statistics_handler = HandlingStatistics(file_handler.get_file())
+# statistics_handler = HandlingStatistics(file_handler.get_file())
+statistics_handler = HandlingStatistics()
 
 router = APIRouter(
     prefix="/preprocessing",
@@ -33,6 +34,7 @@ async def load_file(file: UploadFile, response: Response) -> Any:
         resp = file_handler.save_file(file)
         return UploadFileResponse(local_file_path=resp[0], docs_inserted_mongo=resp[1])
     except Exception as error:
+        print(error)
         response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
 
 @router.get("/describe_file", 

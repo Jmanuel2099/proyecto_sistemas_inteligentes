@@ -1,5 +1,5 @@
 import json
-from preprocessing_service.domain.file import File
+from preprocessing_service.domain.file import FileSingleton
 from preprocessing_service.data_base.mongo.mongo_implementation import MongoImplementation
 from preprocessing_service.models.request.missing_data_options import MissingDataOptions
 
@@ -11,7 +11,7 @@ class HandlingFile:
     COLLECTION_AVERAGE_IMPUTATION = 'no_data_missing_by_average_imputation'
 
     def __init__(self) -> None:
-        self.file = File()
+        self.file = FileSingleton()
         self.respository = MongoImplementation()
 
     def get_file(self):

@@ -1,10 +1,24 @@
 import os
+from typing import Any
 import pandas as pd
 import numpy as np
 from datetime import datetime
 
 
-class File:
+class SingletonMeta(type):
+
+    _instances = {}
+    
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            instance = super().__call__(*args, **kwargs)
+            cls._instances[cls] = instance
+        return cls._instances[cls]
+
+class FileSingleton(metaclass=SingletonMeta):
+    """
+    This class implements the singleton pattern
+    """
     BASE_DIR = "received_files"
     FOLDER_TO_SAVE_NEW_FILES = "new_files"
     DATAFRAME_FOLDER_WITH_DESCARD = 'dataframa_with_descard'
