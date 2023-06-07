@@ -20,9 +20,9 @@ class HandlingFile:
     def save_file(self, file):
         try:
             self.file.save_file(file)
-            num_inserted_documents = self._load_data_in_respository(
-                self.file.get_data_frame(),self.COLLECTION_TEST_NAME)
-            
+            # num_inserted_documents = self._load_data_in_respository(
+            #     self.file.get_data_frame(),self.COLLECTION_TEST_NAME)
+            num_inserted_documents = 0
             return self.file.get_path(), num_inserted_documents
         except Exception as error:
             raise error
@@ -43,14 +43,15 @@ class HandlingFile:
             
             if method is MissingDataOptions.descard:
                 self.file.missing_data_by_discard()
-                num_inserted_documents = self._load_data_in_respository(self.file.get_df_not_missing_data(),
-                                            self.COLLECTION_DISCARDING)
+                # num_inserted_documents = self._load_data_in_respository(self.file.get_df_not_missing_data(),
+                #                             self.COLLECTION_DISCARDING)
             if method is MissingDataOptions.avergae_imputation:
                 self.file.missing_data_by_imputation()
-                num_inserted_documents = self._load_data_in_respository(self.file.get_df_not_missing_data(),
-                                            self.COLLECTION_AVERAGE_IMPUTATION)
+                # num_inserted_documents = self._load_data_in_respository(self.file.get_df_not_missing_data(),
+                #                             self.COLLECTION_AVERAGE_IMPUTATION)
             
-            return self.file.get_path(), num_inserted_documents
+            # return self.file.get_path(), num_inserted_documents
+            return self.file.get_path(), 0
         except Exception as error:
             raise error
 

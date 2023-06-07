@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from preprocessing_service.router import preprocessing_router
-from training_service.router import training_router
+from training_service.presentation.router import training_router
 
 
 app = FastAPI()

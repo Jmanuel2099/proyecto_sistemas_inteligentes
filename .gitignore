@@ -1,7 +1,8 @@
 #storage
 received_files/
-
+trained_models/
 #Environment
+credentials.py
 preprocessing_service/data_base/mongo/mongo_credentials.py
 
 # Byte-compiled / optimized / DLL files

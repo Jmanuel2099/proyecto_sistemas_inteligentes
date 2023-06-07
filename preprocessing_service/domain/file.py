@@ -29,23 +29,23 @@ class FileSingleton(metaclass=SingletonMeta):
         self.data_frame = None
         self.data_frame_not_missing_data = None
 
+    def get_path(self):
+        return self.path
+    
     def get_data_frame(self):
         return self.data_frame
-
-    def set_data_frame(self, new_data_frame):
-        self.data_frame = new_data_frame
 
     def get_df_not_missing_data(self):
         return self.data_frame_not_missing_data
 
-    def set_df_not_missing_data(self, new_df):
-        self.data_frame_not_missing_data = new_df
-
-    def get_path(self):
-        return self.path
-
     def set_path(self, new_path):
         self.path = new_path
+
+    def set_data_frame(self, new_data_frame):
+        self.data_frame = new_data_frame
+
+    def set_df_not_missing_data(self, new_df):
+        self.data_frame_not_missing_data = new_df
 
     def save_file(self, file):
         try:
