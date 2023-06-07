@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
 
-class ErrorResposne(BaseModel):
+class ErrorResponse(BaseModel):
     error : str
     message : str
