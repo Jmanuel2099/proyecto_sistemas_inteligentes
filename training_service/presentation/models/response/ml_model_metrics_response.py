@@ -6,9 +6,9 @@ class MlModelMetricResponse(BaseModel):
     normalization_type: str
     overfitting_underfitting: str
     target: str
-    all_features : bool
-    features: list[str]
-    accuracy: int
-    precision: int
-    recall: int
-    f1: int
+    all_features : bool | None = None
+    features: list[str] | None = None 
+    accuracy: float | int
+    precision: float | int
+    recall: float | int
+    f1: float | int

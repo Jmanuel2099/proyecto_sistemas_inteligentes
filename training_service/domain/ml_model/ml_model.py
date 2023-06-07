@@ -20,7 +20,21 @@ class MLModel:
 
     FOLDER_STORE_TRAINED_MODELS ='trained_models'
 
-    def __init__(self, model_type, normalization_type, overfitting_underfitting, target, all_features, features, percent_tests, number_folds, neighbors, kernel, depth) -> None:
+    def __init__(self, model_type, 
+                normalization_type, 
+                overfitting_underfitting, 
+                target, 
+                all_features, 
+                features=None, 
+                percent_tests=None, 
+                number_folds=None, 
+                neighbors=None, 
+                kernel=None, 
+                depth=None, 
+                accuracy=0, 
+                precision=0, 
+                recall=0, 
+                f1=0) -> None:
         self.model_type = model_type
         self.normalization_type = normalization_type
         self.overfitting_underfitting = overfitting_underfitting
@@ -33,10 +47,10 @@ class MLModel:
         self.kernel = kernel
         self.depth = depth
         self.dataframe = self.get_dataframe()
-        self.accuracy = 0 
-        self.precision = 0 
-        self.recall = 0 
-        self.f1 = 0
+        self.accuracy = accuracy
+        self.precision = precision
+        self.recall = recall 
+        self.f1 = f1
 
     def to_dict(self):
         return{
@@ -48,6 +62,7 @@ class MLModel:
             "features": self.features,
             "accuracy": self.accuracy,
             "precision": self.precision,
+            "recall": self.recall,
             "f1": self.f1
         }
     

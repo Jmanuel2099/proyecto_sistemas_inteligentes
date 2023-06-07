@@ -1,4 +1,4 @@
-from typing import Any, Union
+from typing import Any, Union, List
 from fastapi import APIRouter, Response, status
 # Models
 from training_service.presentation.models.request.training_model_request import TrainingModelRequest, ModelNameOptions, OverfittingUnderfittingOptions
@@ -37,14 +37,14 @@ def training_model(request: TrainingModelRequest, response: Response) -> Any:
 
 @router.get("/model_metrics",
             status_code= status.HTTP_200_OK,
-            response_model=Union[ml_model_metrics_response.MlModelMetricResponse, error_response.ErrorResponse])
+            response_model=Union[List[ml_model_metrics_response.MlModelMetricResponse], error_response.ErrorResponse])
 def visualize_model_metrics(response: Response):
     # try:
     resp = []
     use_case = config_visualize_metrics_use_case()
-    models = use_case.get_models_whit_metrics(0)
-    
-    for data_model in models:
+    ml_models = use_case.get_all_models_whit_metrics()
+    print("ml_models: ", ml_models)
+    for data_model in ml_models:
         resp.append(ml_model_metrics_response.MlModelMetricResponse(**data_model))
 
     return resp

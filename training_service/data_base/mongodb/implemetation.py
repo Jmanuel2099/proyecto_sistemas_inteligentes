@@ -1,5 +1,5 @@
 import pymongo
-from typing import Any, List
+from typing import Any, List, Union
 from .conecction import db
 from training_service.domain.ml_model.ml_model_repository import MlModelRepository
 from training_service.domain.ml_model.ml_model import  MLModel
@@ -22,11 +22,25 @@ class MongoImplementation(MlModelRepository):
         except Exception as error:
             raise error
         
-    def get_ml_models(self, limit:int) ->List[MLModel]:
+    def get_all_ml_models(self) -> List[MLModel]:
         db_collection = db.get_collection(self.COLLECTION_NAME)
-        if limit == 0:
-            records = db_collection.find().sort("accuracy", pymongo.DESCENDING)
-        else:
-            records = db_collection.find().sort("accuracy", pymongo.DESCENDING).limit(limit)
-        
+        records = db_collection.find().sort("accuracy", pymongo.DESCENDING)
         ml_models = []
+        for record in records:
+            ml_model = MLModel(model_type=record["model_type"],
+                               normalization_type=record["normalization_type"],
+                               overfitting_underfitting=record["overfitting_underfitting"],
+                               target=record["target"],
+                               all_features=record["all_features"],
+                               features=record["features"],
+                               accuracy=record["accuracy"],
+                               recall=record["recall"],
+                               precision=record["precision"],
+                               f1=record["f1"])
+            ml_models.append(ml_model)
+        return ml_models
+    
+    def get_ml_models_by_filter(self, limit:int, featurs:Union[List[str], bool]) -> List[MLModel]:
+        db_collection = db.get_collection(self.COLLECTION_NAME)
+        # db_collection.find().where()
+        return None
