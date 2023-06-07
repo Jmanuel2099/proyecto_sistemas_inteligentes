@@ -2,11 +2,12 @@ from typing import Any, Union, List
 from fastapi import APIRouter, Response, status
 # Models
 from training_service.presentation.models.request.training_model_request import TrainingModelRequest, ModelNameOptions, OverfittingUnderfittingOptions
+from training_service.presentation.models.request.get_model_request import GetMlModelRequest
 from training_service.presentation.models.response import error_response, training_response, ml_model_metrics_response
 # mapper
 from training_service.presentation.mapper.training_request_to_ml_mdel import TrainingRequestToMLModel
 #config dependencies
-from training_service.core.dependencies import config_training_use_case, config_visualize_metrics_use_case
+from training_service.core.dependencies import config_training_use_case, config_all_ml_models_metrics_use_case, config_ml_models_by_features_use_case
 
 
 router = APIRouter(
@@ -35,17 +36,44 @@ def training_model(request: TrainingModelRequest, response: Response) -> Any:
     #     print(error)
     #     response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
 
-@router.get("/model_metrics",
-            status_code= status.HTTP_200_OK,
-            response_model=Union[List[ml_model_metrics_response.MlModelMetricResponse], error_response.ErrorResponse])
-def visualize_model_metrics(response: Response):
+@router.post("/models_features",
+        status_code= status.HTTP_200_OK,
+        response_model=Union[List[ml_model_metrics_response.MlModelMetricResponse], error_response.ErrorResponse])
+def get_ml_models_by_features(request: GetMlModelRequest, response: Response) -> Any:
     # try:
+    use_case = config_ml_models_by_features_use_case()
+    if request.all_features:
+        ml_models = use_case.get_ml_models_by_features(request.limit, request.all_features)
+    if request.features:
+        ml_models = use_case.get_ml_models_by_features(request.limit, request.features)
+
+    if not ml_models:
+        response.status_code = status.HTTP_408_REQUEST_TIMEOUT
+        return error_response.ErrorResponse(error= status.HTTP_408_REQUEST_TIMEOUT,
+                                            message="No records found in the database.")
     resp = []
-    use_case = config_visualize_metrics_use_case()
+    for data_ml_model in ml_models:
+        resp.append(ml_model_metrics_response.MlModelMetricResponse(**data_ml_model))
+
+    return resp
+    # except Exception as error:
+    #     print(error)
+    #     response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+
+@router.get("/list_models",
+        status_code= status.HTTP_200_OK,
+        response_model=Union[List[ml_model_metrics_response.MlModelMetricResponse], error_response.ErrorResponse])
+def visualize_model_metrics(response: Response) -> Any:
+    # try:
+    use_case = config_all_ml_models_metrics_use_case()
     ml_models = use_case.get_all_models_whit_metrics()
-    print("ml_models: ", ml_models)
-    for data_model in ml_models:
-        resp.append(ml_model_metrics_response.MlModelMetricResponse(**data_model))
+    if not ml_models:
+        response.status_code = status.HTTP_408_REQUEST_TIMEOUT
+        return error_response.ErrorResponse(error= status.HTTP_408_REQUEST_TIMEOUT,
+                                            message="No records found in the database.")
+    resp = []
+    for data_ml_model in ml_models:
+        resp.append(ml_model_metrics_response.MlModelMetricResponse(**data_ml_model))
 
     return resp
     # except Exception as error:

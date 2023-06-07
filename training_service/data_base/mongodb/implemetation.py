@@ -25,6 +25,8 @@ class MongoImplementation(MlModelRepository):
     def get_all_ml_models(self) -> List[MLModel]:
         db_collection = db.get_collection(self.COLLECTION_NAME)
         records = db_collection.find().sort("accuracy", pymongo.DESCENDING)
+        if not records: 
+            return None
         ml_models = []
         for record in records:
             ml_model = MLModel(model_type=record["model_type"],
@@ -38,9 +40,31 @@ class MongoImplementation(MlModelRepository):
                                precision=record["precision"],
                                f1=record["f1"])
             ml_models.append(ml_model)
+        
         return ml_models
     
-    def get_ml_models_by_filter(self, limit:int, featurs:Union[List[str], bool]) -> List[MLModel]:
+    def get_ml_models_by_filter(self, limit:int, features:Union[List[str], bool]) -> List[MLModel]:
+        if isinstance(features, List):
+            query = {"features": {"$in": features}}
+        else:
+            query = {"all_features": True}
+            
         db_collection = db.get_collection(self.COLLECTION_NAME)
-        # db_collection.find().where()
-        return None
+        records = db_collection.find(query).sort("accuracy", pymongo.DESCENDING).limit(limit)
+        if not records: 
+            return None
+        ml_models = []
+        for record in records:
+            ml_model = MLModel(model_type=record["model_type"],
+                               normalization_type=record["normalization_type"],
+                               overfitting_underfitting=record["overfitting_underfitting"],
+                               target=record["target"],
+                               all_features=record["all_features"],
+                               features=record["features"],
+                               accuracy=record["accuracy"],
+                               recall=record["recall"],
+                               precision=record["precision"],
+                               f1=record["f1"])
+            ml_models.append(ml_model)
+        
+        return ml_models
