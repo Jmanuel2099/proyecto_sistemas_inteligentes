@@ -87,6 +87,7 @@ def visualize_model_metrics(response: Response) -> Any:
 def make_predict(request: PredictionRequest, response: Response):
     use_case = config_predict_use_case()
     resp = use_case.predict(ml_model_path= request.model_identifier, features= request.data)
+    return resp
 
 def _check_possible_request_error(request, response):
     if (request.model_type is ModelNameOptions.knn 

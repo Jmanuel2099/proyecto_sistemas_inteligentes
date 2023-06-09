@@ -27,7 +27,7 @@ class TrainingModelRequest(BaseModel):
     normalization_type: NormalizationOptions = Field(max_length=16)
     overfitting_underfitting: OverfittingUnderfittingOptions = Field(max_length=17)
     target: str = Field(max_length=50)
-    all_features : bool | None = True
+    all_features : bool | None = False
     features: list[str] | None = None
     percent_tests: int | None = None
     number_folds: int | None = None

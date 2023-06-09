@@ -159,6 +159,7 @@ class MLModel:
         # try:
         kf = KFold(n_splits=self.number_folds, shuffle=True)
         cv_results = cross_validate(model, X=X, y=y,scoring=['accuracy', 'precision', 'recall', 'f1'], cv=kf)
+        model.fit(X, y)
         self._save_model_in_local(model)
         print("keys ", cv_results.keys() )
         average_accuracy = cv_results['test_accuracy'].mean()
