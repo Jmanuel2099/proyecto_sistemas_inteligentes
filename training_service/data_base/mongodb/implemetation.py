@@ -38,7 +38,8 @@ class MongoImplementation(MlModelRepository):
                                accuracy=record["accuracy"],
                                recall=record["recall"],
                                precision=record["precision"],
-                               f1=record["f1"])
+                               f1=record["f1"],
+                               trained_model_path= record["trained_model_path"])
             ml_models.append(ml_model)
         
         return ml_models
@@ -48,7 +49,7 @@ class MongoImplementation(MlModelRepository):
             query = {"features": {"$in": features}}
         else:
             query = {"all_features": True}
-            
+
         db_collection = db.get_collection(self.COLLECTION_NAME)
         records = db_collection.find(query).sort("accuracy", pymongo.DESCENDING).limit(limit)
         if not records: 
@@ -64,7 +65,8 @@ class MongoImplementation(MlModelRepository):
                                accuracy=record["accuracy"],
                                recall=record["recall"],
                                precision=record["precision"],
-                               f1=record["f1"])
+                               f1=record["f1"],
+                               trained_model_path= record["trained_model_path"])
             ml_models.append(ml_model)
         
         return ml_models

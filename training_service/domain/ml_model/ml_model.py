@@ -10,7 +10,7 @@ from sklearn.linear_model import LinearRegression, LogisticRegression
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.naive_bayes import GaussianNB
-from sklearn.model_selection import train_test_split, cross_val_predict
+from sklearn.model_selection import train_test_split, cross_val_predict, cross_validate
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from sklearn.model_selection import KFold
 import joblib
@@ -34,7 +34,8 @@ class MLModel:
                 accuracy=0, 
                 precision=0, 
                 recall=0, 
-                f1=0) -> None:
+                f1=0, 
+                trained_model_path="") -> None:
         self.model_type = model_type
         self.normalization_type = normalization_type
         self.overfitting_underfitting = overfitting_underfitting
@@ -46,11 +47,12 @@ class MLModel:
         self.neighbors = neighbors
         self.kernel = kernel
         self.depth = depth
-        self.dataframe = self.get_dataframe()
         self.accuracy = accuracy
         self.precision = precision
         self.recall = recall 
         self.f1 = f1
+        self.dataframe = self.get_dataframe()
+        self.trained_model_path = trained_model_path
 
     def to_dict(self):
         return{
@@ -63,7 +65,8 @@ class MLModel:
             "accuracy": self.accuracy,
             "precision": self.precision,
             "recall": self.recall,
-            "f1": self.f1
+            "f1": self.f1,
+            "trained_model_path": self.trained_model_path
         }
     
     def get_dataframe(self):
@@ -89,6 +92,7 @@ class MLModel:
     def get_features_and_target(self):
         if self.all_features:
             X = self.dataframe.drop([self.target], axis=1)
+            self.features = list(X.columns)
         else:
             X = self.dataframe.loc[:, self.features]
         y = self.dataframe[self.target]
@@ -151,13 +155,18 @@ class MLModel:
         # except Exception as error:
         #     raise error
 
-    def cross_validation(self, model, x, y):
+    def cross_validation(self, model, X, y):
         # try:
-        kf = KFold(n_splits=self.number_folds)
+        kf = KFold(n_splits=self.number_folds, shuffle=True)
+        cv_results = cross_validate(model, X=X, y=y,scoring=['accuracy', 'precision', 'recall', 'f1'], cv=kf)
         self._save_model_in_local(model)
-        y_predict = cross_val_predict(model, X=x, y=y, cv=kf)
+        print("keys ", cv_results.keys() )
+        average_accuracy = cv_results['test_accuracy'].mean()
+        average_precision = cv_results['test_precision'].mean()
+        average_recall = cv_results['test_recall'].mean()
+        average_f1 = cv_results['test_f1'].mean()
 
-        return self._metrics(y_test=y, y_predict=y_predict)
+        return average_accuracy, average_precision, average_recall, average_f1
         # except Exception as error:
         #     raise error
 
@@ -166,20 +175,23 @@ class MLModel:
             folder_path = os.path.join(self.FOLDER_STORE_TRAINED_MODELS, self.model_type)
             if not os.path.exists(folder_path):
                 os.makedirs(folder_path)
-            path_model_file = os.path.join(folder_path,datetime.now().strftime("%Y-%m-%d_%H-%M-%S") )
-            joblib.dump(model, f'{path_model_file}.pkl')
+            path_model_file = os.path.join(folder_path, f'{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.pkl' )
+            joblib.dump(model, path_model_file)
+            self.trained_model_path = path_model_file
         except Exception as error:
             raise error
 
     def _metrics(self, y_test, y_predict):
+        try:
+            self.accuracy = accuracy_score(y_test, y_predict)
+            print("acc: ", self.accuracy)
+            self.precision = precision_score(y_test, y_predict)
+            print("precc: ", self.precision)
+            self.recall = recall_score(y_test, y_predict)
+            print("rec: ", self.recall)
+            self.f1 = f1_score(y_test, y_predict)
+            print("f1:", self.f1)
 
-        self.accuracy = accuracy_score(y_test, y_predict)
-        print("acc: ", self.accuracy)
-        self.precision = precision_score(y_test, y_predict)
-        print("precc: ", self.precision)
-        self.recall = recall_score(y_test, y_predict)
-        print("rec: ", self.recall)
-        self.f1 = f1_score(y_test, y_predict)
-        print("f1:", self.f1)
-        
-        return self.accuracy, self.precision, self.recall, self.f1
+            return self.accuracy, self.precision, self.recall, self.f1
+        except Exception as error:
+            raise error

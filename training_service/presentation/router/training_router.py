@@ -3,11 +3,12 @@ from fastapi import APIRouter, Response, status
 # Models
 from training_service.presentation.models.request.training_model_request import TrainingModelRequest, ModelNameOptions, OverfittingUnderfittingOptions
 from training_service.presentation.models.request.get_model_request import GetMlModelRequest
+from training_service.presentation.models.request.prediction_request import PredictionRequest
 from training_service.presentation.models.response import error_response, training_response, ml_model_metrics_response
 # mapper
 from training_service.presentation.mapper.training_request_to_ml_mdel import TrainingRequestToMLModel
 #config dependencies
-from training_service.core.dependencies import config_training_use_case, config_all_ml_models_metrics_use_case, config_ml_models_by_features_use_case
+from training_service.core.dependencies import config_training_use_case, config_all_ml_models_metrics_use_case, config_ml_models_by_features_use_case, config_predict_use_case
 
 
 router = APIRouter(
@@ -79,6 +80,13 @@ def visualize_model_metrics(response: Response) -> Any:
     # except Exception as error:
     #     print(error)
     #     response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+
+@router.post("/predict",
+             status_code= status.HTTP_200_OK,
+             response_model=Union[float, int, str, error_response.ErrorResponse])
+def make_predict(request: PredictionRequest, response: Response):
+    use_case = config_predict_use_case()
+    resp = use_case.predict(ml_model_path= request.model_identifier, features= request.data)
 
 def _check_possible_request_error(request, response):
     if (request.model_type is ModelNameOptions.knn 

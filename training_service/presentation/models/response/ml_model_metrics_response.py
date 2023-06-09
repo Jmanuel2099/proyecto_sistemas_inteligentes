@@ -12,3 +12,4 @@ class MlModelMetricResponse(BaseModel):
     precision: float | int
     recall: float | int
     f1: float | int
+    trained_model_path: str
