@@ -4,7 +4,7 @@ from fastapi import APIRouter, Response, status
 from training_service.presentation.models.request.training_model_request import TrainingModelRequest, ModelNameOptions, OverfittingUnderfittingOptions
 from training_service.presentation.models.request.get_model_request import GetMlModelRequest
 from training_service.presentation.models.request.prediction_request import PredictionRequest
-from training_service.presentation.models.response import error_response, training_response, ml_model_metrics_response
+from training_service.presentation.models.response import error_response, ml_model_trained_response, predict_response
 # mapper
 from training_service.presentation.mapper.training_request_to_ml_mdel import TrainingRequestToMLModel
 #config dependencies
@@ -18,102 +18,108 @@ router = APIRouter(
 
 @router.post("/training_model",
             status_code= status.HTTP_200_OK, 
-            response_model= Union[training_response.TrainingResponse, error_response.ErrorResponse])
+            response_model= Union[ml_model_trained_response.MlModelTrainedResponse, error_response.ErrorResponse])
 def training_model(request: TrainingModelRequest, response: Response) -> Any:
     # try:
-    error_response = _check_possible_request_error(request, response)
-    if error_response is not None:
-        return error_response
+    error_resp = _check_possible_request_error(request, response)
+    if error_resp is not None:
+        return error_resp
 
     mapper = TrainingRequestToMLModel()
     use_case = config_training_use_case(mapper.mapper_request_to_mlmodel(fastapi_model=request))
-
     resp = use_case.training()
-    return training_response.TrainingResponse(accuracy=resp[0], 
-                                            precision=resp[1], 
-                                            recall= resp[2], 
-                                            f1=resp[3])
+    if resp is None:
+        response.status_code = status.HTTP_408_REQUEST_TIMEOUT
+        return error_response.ErrorResponse(error= status.HTTP_408_REQUEST_TIMEOUT,
+                                            message="You have to verify that you have loaded the dataset or that the columns and target are correct.")
+
+    return ml_model_trained_response.MlModelTrainedResponse(**resp)
     # except Exception as error:
     #     print(error)
     #     response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
 
 @router.post("/models_features",
         status_code= status.HTTP_200_OK,
-        response_model=Union[List[ml_model_metrics_response.MlModelMetricResponse], error_response.ErrorResponse])
+        response_model=Union[List[ml_model_trained_response.MlModelTrainedResponse], error_response.ErrorResponse])
 def get_ml_models_by_features(request: GetMlModelRequest, response: Response) -> Any:
-    # try:
-    use_case = config_ml_models_by_features_use_case()
-    if request.all_features:
-        ml_models = use_case.get_ml_models_by_features(request.limit, request.all_features)
-    if request.features:
-        ml_models = use_case.get_ml_models_by_features(request.limit, request.features)
+    try:
+        use_case = config_ml_models_by_features_use_case()
+        if request.all_features:
+            ml_models = use_case.get_ml_models_by_features(request.limit, request.all_features)
+        if request.features:
+            ml_models = use_case.get_ml_models_by_features(request.limit, request.features)
 
-    if not ml_models:
-        response.status_code = status.HTTP_408_REQUEST_TIMEOUT
-        return error_response.ErrorResponse(error= status.HTTP_408_REQUEST_TIMEOUT,
-                                            message="No records found in the database.")
-    resp = []
-    for data_ml_model in ml_models:
-        resp.append(ml_model_metrics_response.MlModelMetricResponse(**data_ml_model))
+        if not ml_models:
+            response.status_code = status.HTTP_408_REQUEST_TIMEOUT
+            return error_response.ErrorResponse(error= status.HTTP_408_REQUEST_TIMEOUT,
+                                                message="No records found in the database.")
+        resp = []
+        for data_ml_model in ml_models:
+            resp.append(ml_model_trained_response.MlModelTrainedResponse(**data_ml_model))
 
-    return resp
-    # except Exception as error:
-    #     print(error)
-    #     response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+        return resp
+    except Exception as error:
+        print(error)
+        response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
 
 @router.get("/list_models",
         status_code= status.HTTP_200_OK,
-        response_model=Union[List[ml_model_metrics_response.MlModelMetricResponse], error_response.ErrorResponse])
+        response_model=Union[List[ml_model_trained_response.MlModelTrainedResponse], error_response.ErrorResponse])
 def visualize_model_metrics(response: Response) -> Any:
-    # try:
-    use_case = config_all_ml_models_metrics_use_case()
-    ml_models = use_case.get_all_models_whit_metrics()
-    if not ml_models:
-        response.status_code = status.HTTP_408_REQUEST_TIMEOUT
-        return error_response.ErrorResponse(error= status.HTTP_408_REQUEST_TIMEOUT,
-                                            message="No records found in the database.")
-    resp = []
-    for data_ml_model in ml_models:
-        resp.append(ml_model_metrics_response.MlModelMetricResponse(**data_ml_model))
+    try:
+        use_case = config_all_ml_models_metrics_use_case()
+        ml_models = use_case.get_all_models_whit_metrics()
+        if not ml_models:
+            response.status_code = status.HTTP_408_REQUEST_TIMEOUT
+            return error_response.ErrorResponse(error= status.HTTP_408_REQUEST_TIMEOUT,
+                                                message="No records found in the database.")
+        resp = []
+        for data_ml_model in ml_models:
+            resp.append(ml_model_trained_response.MlModelTrainedResponse(**data_ml_model))
 
-    return resp
+        return resp
+    except Exception as error:
+        print(error)
+        response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+
+@router.post("/predict",
+             status_code= status.HTTP_200_OK,
+             response_model=Union[predict_response.PredictResponse, error_response.ErrorResponse])
+def make_prediction(request: PredictionRequest, response: Response):
+    # try:
+    use_case = config_predict_use_case()
+    resp = use_case.predict(ml_model_path= request.model_identifier, features=request.data)
+    prediction_response = predict_response.PredictResponse(prediction=resp[0])
+    return prediction_response
     # except Exception as error:
     #     print(error)
     #     response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
 
-@router.post("/predict",
-             status_code= status.HTTP_200_OK,
-             response_model=Union[float, int, str, error_response.ErrorResponse])
-def make_predict(request: PredictionRequest, response: Response):
-    use_case = config_predict_use_case()
-    resp = use_case.predict(ml_model_path= request.model_identifier, features= request.data)
-    return resp
-
 def _check_possible_request_error(request, response):
-    if (request.model_type is ModelNameOptions.knn 
+    if (request.model_type == ModelNameOptions.knn 
         and request.neighbors is None):
         response.status_code = status.HTTP_400_BAD_REQUEST
         return error_response.ErrorResponse(error= status.HTTP_400_BAD_REQUEST, 
                                     message="for the knn machine learning model the neighbors are needed.")
 
-    if (request.model_type is ModelNameOptions.svm 
+    if (request.model_type == ModelNameOptions.svm 
         and request.kernel is None):
         response.status_code = status.HTTP_400_BAD_REQUEST
         return error_response.ErrorResponse(error= status.HTTP_400_BAD_REQUEST, 
                                     message="for the svm machine learning model the kernel is needed.")
     
-    if (request.model_type is ModelNameOptions.decision_trees 
+    if (request.model_type == ModelNameOptions.decision_trees 
         and request.depth is None):
         response.status_code = status.HTTP_400_BAD_REQUEST
         return error_response.ErrorResponse(error= status.HTTP_400_BAD_REQUEST, 
                                     message="for the decision tree machine learning model the depth is needed.")
     
-    if (request.overfitting_underfitting is OverfittingUnderfittingOptions.cross_validation 
+    if (request.overfitting_underfitting == OverfittingUnderfittingOptions.cross_validation 
         and request.number_folds is None):
         response.status_code = status.HTTP_400_BAD_REQUEST
         return error_response.ErrorResponse(error= status.HTTP_400_BAD_REQUEST, 
                                     message="for cross validation we need the number folds.")
-    if (request.overfitting_underfitting is OverfittingUnderfittingOptions.hold_out 
+    if (request.overfitting_underfitting == OverfittingUnderfittingOptions.hold_out 
         and request.percent_tests is None) :
         response.status_code = status.HTTP_400_BAD_REQUEST
         return error_response.ErrorResponse(error= status.HTTP_400_BAD_REQUEST, 

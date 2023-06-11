@@ -6,9 +6,9 @@ from preprocessing_service.models.request.missing_data_options import MissingDat
 class HandlingFile:
     DESCARD_METHOD = 1
     AVERAGE_IMPUTATION_METHOD = 2
-    COLLECTION_TEST_NAME = 'test'
-    COLLECTION_DISCARDING = 'no_data_missing_by_discarding'
-    COLLECTION_AVERAGE_IMPUTATION = 'no_data_missing_by_average_imputation'
+    COLLECTION_TEST_NAME = 'data'
+    COLLECTION_DISCARDING = 'data_missing_by_discarding'
+    COLLECTION_AVERAGE_IMPUTATION = 'data_missing_by_average_imputation'
 
     def __init__(self) -> None:
         self.file = FileSingleton()
@@ -20,9 +20,8 @@ class HandlingFile:
     def save_file(self, file):
         try:
             self.file.save_file(file)
-            # num_inserted_documents = self._load_data_in_respository(
-            #     self.file.get_data_frame(),self.COLLECTION_TEST_NAME)
-            num_inserted_documents = 0
+            num_inserted_documents = self._load_data_in_respository(
+                self.file.get_data_frame(),self.COLLECTION_TEST_NAME)
             return self.file.get_path(), num_inserted_documents
         except Exception as error:
             raise error
@@ -43,15 +42,14 @@ class HandlingFile:
             
             if method is MissingDataOptions.descard:
                 self.file.missing_data_by_discard()
-                # num_inserted_documents = self._load_data_in_respository(self.file.get_df_not_missing_data(),
-                #                             self.COLLECTION_DISCARDING)
+                num_inserted_documents = self._load_data_in_respository(self.file.get_df_not_missing_data(),
+                                            self.COLLECTION_DISCARDING)
             if method is MissingDataOptions.avergae_imputation:
                 self.file.missing_data_by_imputation()
-                # num_inserted_documents = self._load_data_in_respository(self.file.get_df_not_missing_data(),
-                #                             self.COLLECTION_AVERAGE_IMPUTATION)
+                num_inserted_documents = self._load_data_in_respository(self.file.get_df_not_missing_data(),
+                                            self.COLLECTION_AVERAGE_IMPUTATION)
             
-            # return self.file.get_path(), num_inserted_documents
-            return self.file.get_path(), 0
+            return self.file.get_path(), num_inserted_documents
         except Exception as error:
             raise error
 

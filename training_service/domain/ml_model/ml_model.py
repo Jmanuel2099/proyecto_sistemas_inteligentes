@@ -14,6 +14,7 @@ from sklearn.model_selection import train_test_split, cross_val_predict, cross_v
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from sklearn.model_selection import KFold
 import joblib
+import pickle
 
 
 class MLModel:
@@ -90,21 +91,33 @@ class MLModel:
             return None
 
     def get_features_and_target(self):
-        if self.all_features:
-            X = self.dataframe.drop([self.target], axis=1)
-            self.features = list(X.columns)
-        else:
-            X = self.dataframe.loc[:, self.features]
-        y = self.dataframe[self.target]
+        try:
+            if self.dataframe is None:
+                return None
 
-        return X, y
+            if self.all_features:
+                X = self.dataframe.drop([self.target], axis=1)
+                self.features = list(X.columns)
+            else:
+                if not self._existsColumnsInDataframe():
+                    return None
+
+                X = self.dataframe.loc[:, self.features]
+            y = self.dataframe[self.target]
+
+            return X, y
+        except Exception as error:
+            raise error
 
     def encoder_target(self, target):
-        if not pd.api.types.is_numeric_dtype(target):
-            encoder = LabelEncoder()
-            return encoder.fit_transform(target)
-        
-        return target
+        try:
+            if not pd.api.types.is_numeric_dtype(target):
+                encoder = LabelEncoder()
+                return encoder.fit_transform(target)
+            
+            return target
+        except Exception as error:
+            raise error
 
     def encoder_categorical_columns(self, dataframe):
         try:
@@ -150,8 +163,9 @@ class MLModel:
         model.fit(x_train, y_train)
         self._save_model_in_local(model)
         y_predict= model.predict(x_test)
+        self._metrics(y_test=y_test, y_predict= y_predict)
 
-        return self._metrics(y_test=y_test, y_predict= y_predict)
+        return self.to_dict()
         # except Exception as error:
         #     raise error
 
@@ -159,15 +173,15 @@ class MLModel:
         # try:
         kf = KFold(n_splits=self.number_folds, shuffle=True)
         cv_results = cross_validate(model, X=X, y=y,scoring=['accuracy', 'precision', 'recall', 'f1'], cv=kf)
+        self.accuracy = cv_results['test_accuracy'].mean()
+        self.precision = cv_results['test_precision'].mean()
+        self.recall = cv_results['test_recall'].mean()
+        self.f1 = cv_results['test_f1'].mean()
+
         model.fit(X, y)
         self._save_model_in_local(model)
-        print("keys ", cv_results.keys() )
-        average_accuracy = cv_results['test_accuracy'].mean()
-        average_precision = cv_results['test_precision'].mean()
-        average_recall = cv_results['test_recall'].mean()
-        average_f1 = cv_results['test_f1'].mean()
-
-        return average_accuracy, average_precision, average_recall, average_f1
+        # return self.accuracy, self.precision, self.recall, self.f1
+        return self.to_dict()
         # except Exception as error:
         #     raise error
 
@@ -177,7 +191,9 @@ class MLModel:
             if not os.path.exists(folder_path):
                 os.makedirs(folder_path)
             path_model_file = os.path.join(folder_path, f'{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.pkl' )
-            joblib.dump(model, path_model_file)
+            # joblib.dump(model, path_model_file)
+            with open(path_model_file, 'wb') as f:
+                pickle.dump(model, f)
             self.trained_model_path = path_model_file
         except Exception as error:
             raise error
@@ -193,6 +209,11 @@ class MLModel:
             self.f1 = f1_score(y_test, y_predict)
             print("f1:", self.f1)
 
-            return self.accuracy, self.precision, self.recall, self.f1
         except Exception as error:
             raise error
+
+    def _existsColumnsInDataframe(self):
+        columns_df = self.dataframe.columns.tolist()
+        if all(columna in columns_df for columna in self.features):
+            return True
+        return False

@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
 
-class MlModelMetricResponse(BaseModel):
+class MlModelTrainedResponse(BaseModel):
     model_type: str
     normalization_type: str
     overfitting_underfitting: str

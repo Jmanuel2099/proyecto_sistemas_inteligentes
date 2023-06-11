@@ -3,10 +3,6 @@ from preprocessing_service.domain.file import FileSingleton
 
 
 class HandlingStatistics:
-    # def __init__(self, file) -> None:
-    #     self.file = file
-    #     self.statisticalAnalysis = Statistics(self.file)
-
     def __init__(self) -> None:
         self.statisticalAnalysis = Statistics()
 

@@ -12,6 +12,7 @@ class MongoImplementation(MlModelRepository):
 
     def insert_ml_model(self, model_to_insert: MLModel) -> Any:
         try:
+            print("model dict: ", model_to_insert.to_dict())
             db_collection = db.get_collection(self.COLLECTION_NAME)
             doc_inserted = db_collection.insert_one(model_to_insert.to_dict())
 
