@@ -26,10 +26,10 @@ router = APIRouter(
              response_model= Union[UploadFileResponse, ErrorResposne])
 async def load_file(file: UploadFile, response: Response) -> Any:
     try:
-        if file.filename.split('.')[1] != 'xlsx':
+        if file.filename.split('.')[1] != 'xlsx' and file.filename.split('.')[1] != 'csv':
             response.status_code = status.HTTP_400_BAD_REQUEST
             return ErrorResposne(error= status.HTTP_400_BAD_REQUEST, 
-                                message= "expect a file with .xlsx extension.")
+                                message= "expect a file with .xlsx or csv extension.")
             
         resp = file_handler.save_file(file)
         return UploadFileResponse(local_file_path=resp[0], docs_inserted_mongo=resp[1])

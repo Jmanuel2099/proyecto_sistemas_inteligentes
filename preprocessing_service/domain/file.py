@@ -96,11 +96,20 @@ class FileSingleton(metaclass=SingletonMeta):
             buffer.write(file.file.read())
             
         self.set_path(path_file_to_save)
-        self._create_data_frame()
+        if file.filename.split('.')[1] == 'xlsx' :
+            self._create_data_frame_excel()
+        if file.filename.split('.')[1] == 'csv':
+            self._create_data_frame_csv()
 
-    def _create_data_frame(self):
+    def _create_data_frame_excel(self):
         try:
             self.set_data_frame(pd.read_excel(self.path))
+        except Exception as error: 
+            raise error
+    
+    def _create_data_frame_csv(self):
+        try:
+            self.set_data_frame(pd.read_csv(self.path, delimiter=","))
         except Exception as error: 
             raise error
 
