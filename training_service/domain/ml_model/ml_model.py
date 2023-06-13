@@ -168,7 +168,7 @@ class MLModel:
         self._save_dataframe_to_training(features= pd.concat([x_train, x_test], axis=0), 
                                         target= pd.concat([y_train, y_test], axis=0))
         model.fit(x_train, y_train)
-        self._save_model_in_local(model)
+        self._save_mlmodel_in_local(model)
         y_predict= model.predict(x_test)
         self._metrics(y_test=y_test, y_predict= y_predict)
 

@@ -1,7 +1,7 @@
 from pydantic import BaseModel
-from typing import List, Any
+from typing import Dict, Any
 
 
 class PredictionRequest(BaseModel):
     model_identifier: str
-    data: List[Any]
+    data: Dict[str, Any]
