@@ -48,10 +48,11 @@ class MongoImplementation(MlModelRepository):
     
     def get_ml_models_by_filter(self, limit:int, features:Union[List[str], bool]) -> List[MLModel]:
         if isinstance(features, List):
-            query = {"features": {"$in": features}}
+            query = {'features': {'$in': features}, 'all_features': False}
         else:
-            query = {"all_features": True}
+            query = {'all_features': True}
 
+        print("query: ", query)
         db_collection = db.get_collection(self.COLLECTION_NAME)
         records = db_collection.find(query).sort("accuracy", pymongo.DESCENDING).limit(limit)
         if not records: 
