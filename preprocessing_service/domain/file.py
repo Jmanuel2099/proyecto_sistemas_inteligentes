@@ -25,10 +25,15 @@ class FileSingleton(metaclass=SingletonMeta):
     DATAFRAME_FOLDER_WITH_AVERAGE_IMPUTATION = 'dataframa_with_average_imputation'
 
     def __init__(self) -> None:
+        self.dataset_file = ''
         self.path = ''
         self.data_frame = None
         self.data_frame_not_missing_data = None
 
+    def get_dataset_file(self):
+        print("entro al dtase_file: ", self.dataset_file)
+        return self.dataset_file
+    
     def get_path(self):
         return self.path
     
@@ -49,8 +54,9 @@ class FileSingleton(metaclass=SingletonMeta):
 
     def save_file(self, file):
         try:
+            self.dataset_file = file.filename
             folder_path = self.create_folder_to_store_files(self.FOLDER_TO_SAVE_NEW_FILES)
-            name_new_file = datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + '_' + file.filename
+            name_new_file = datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + '_' + self.dataset_file
             path_new_file = os.path.join(folder_path, name_new_file)
             self._save_file_in_local(file ,path_new_file)
         except Exception as error:

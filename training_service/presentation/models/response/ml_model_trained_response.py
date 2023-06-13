@@ -13,3 +13,4 @@ class MlModelTrainedResponse(BaseModel):
     recall: float | int
     f1: float | int
     trained_model_path: str
+    dataset_file: str

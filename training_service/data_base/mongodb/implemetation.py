@@ -40,7 +40,8 @@ class MongoImplementation(MlModelRepository):
                                recall=record["recall"],
                                precision=record["precision"],
                                f1=record["f1"],
-                               trained_model_path= record["trained_model_path"])
+                               trained_model_path= record["trained_model_path"],
+                               dataset_file= record["dataset_file"])
             ml_models.append(ml_model)
         
         return ml_models
@@ -67,7 +68,8 @@ class MongoImplementation(MlModelRepository):
                                recall=record["recall"],
                                precision=record["precision"],
                                f1=record["f1"],
-                               trained_model_path= record["trained_model_path"])
+                               trained_model_path= record["trained_model_path"],
+                               dataset_file= record["dataset_file"])
             ml_models.append(ml_model)
         
         return ml_models

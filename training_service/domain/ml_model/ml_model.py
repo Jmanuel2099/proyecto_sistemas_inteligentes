@@ -10,9 +10,8 @@ from sklearn.linear_model import LinearRegression, LogisticRegression
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.naive_bayes import GaussianNB
-from sklearn.model_selection import train_test_split, cross_val_predict, cross_validate
+from sklearn.model_selection import train_test_split, cross_val_predict, cross_validate, KFold
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
-from sklearn.model_selection import KFold
 import joblib
 import pickle
 
@@ -36,7 +35,8 @@ class MLModel:
                 precision=0, 
                 recall=0, 
                 f1=0, 
-                trained_model_path="") -> None:
+                trained_model_path="",
+                dataset_file = "") -> None:
         self.model_type = model_type
         self.normalization_type = normalization_type
         self.overfitting_underfitting = overfitting_underfitting
@@ -52,8 +52,9 @@ class MLModel:
         self.precision = precision
         self.recall = recall 
         self.f1 = f1
-        self.dataframe = self.get_dataframe()
         self.trained_model_path = trained_model_path
+        self.dataset_file = dataset_file
+        self.dataframe = self.get_dataframe()
 
     def to_dict(self):
         return{
@@ -67,11 +68,13 @@ class MLModel:
             "precision": self.precision,
             "recall": self.recall,
             "f1": self.f1,
-            "trained_model_path": self.trained_model_path
+            "trained_model_path": self.trained_model_path,
+            "dataset_file": self.dataset_file
         }
     
     def get_dataframe(self):
         file = FileSingleton()
+        self.dataset_file = file.get_dataset_file()
         return file.get_df_not_missing_data()
 
     def get_model_type(self):
@@ -180,7 +183,6 @@ class MLModel:
 
         model.fit(X, y)
         self._save_model_in_local(model)
-        # return self.accuracy, self.precision, self.recall, self.f1
         return self.to_dict()
         # except Exception as error:
         #     raise error
