@@ -20,9 +20,9 @@ class FileSingleton(metaclass=SingletonMeta):
     This class implements the singleton pattern
     """
     BASE_DIR = "received_files"
-    FOLDER_TO_SAVE_NEW_FILES = "new_files"
-    DATAFRAME_FOLDER_WITH_DESCARD = 'dataframa_with_descard'
-    DATAFRAME_FOLDER_WITH_AVERAGE_IMPUTATION = 'dataframa_with_average_imputation'
+    FOLDER_TO_SAVE_NEW_FILES = "dataset"
+    DATAFRAME_FOLDER_WITH_DESCARD = 'dataset_with_descard'
+    DATAFRAME_FOLDER_WITH_AVERAGE_IMPUTATION = 'dataset_with_average_imputation'
 
     def __init__(self) -> None:
         self.dataset_file = ''

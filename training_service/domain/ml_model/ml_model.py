@@ -18,7 +18,9 @@ import pickle
 
 class MLModel:
 
-    FOLDER_STORE_TRAINED_MODELS ='trained_models'
+    BASE_DIR = "received_files"
+    FOLDER_STORE_TRAINED_MODELS = 'trained_models'
+    FOLDER_STORE_DATASET_NORMALIZED = os.path.join(BASE_DIR, 'dataset_normalized')
 
     def __init__(self, model_type, 
                 normalization_type, 
@@ -74,7 +76,7 @@ class MLModel:
     
     def get_dataframe(self):
         file = FileSingleton()
-        self.dataset_file = file.get_dataset_file()
+        self.dataset_file = file.get_dataset_file().split(".")[0]# no se tiene en cuenta la extension
         return file.get_df_not_missing_data()
 
     def get_model_type(self):
@@ -163,6 +165,8 @@ class MLModel:
 
     def fit_hold_out(self, model, x_train, x_test, y_train, y_test):
         # try:
+        self._save_dataframe_to_training(features= pd.concat([x_train, x_test], axis=0), 
+                                        target= pd.concat([y_train, y_test], axis=0))
         model.fit(x_train, y_train)
         self._save_model_in_local(model)
         y_predict= model.predict(x_test)
@@ -174,6 +178,7 @@ class MLModel:
 
     def cross_validation(self, model, X, y):
         # try:
+        self._save_dataframe_to_training(features=X, target=y)
         kf = KFold(n_splits=self.number_folds, shuffle=True)
         cv_results = cross_validate(model, X=X, y=y,scoring=['accuracy', 'precision', 'recall', 'f1'], cv=kf)
         self.accuracy = cv_results['test_accuracy'].mean()
@@ -182,12 +187,12 @@ class MLModel:
         self.f1 = cv_results['test_f1'].mean()
 
         model.fit(X, y)
-        self._save_model_in_local(model)
+        self._save_mlmodel_in_local(model)
         return self.to_dict()
         # except Exception as error:
         #     raise error
 
-    def _save_model_in_local(self, model):
+    def _save_mlmodel_in_local(self, model):
         try:
             folder_path = os.path.join(self.FOLDER_STORE_TRAINED_MODELS, self.model_type)
             if not os.path.exists(folder_path):
@@ -219,3 +224,11 @@ class MLModel:
         if all(columna in columns_df for columna in self.features):
             return True
         return False
+
+    def _save_dataframe_to_training(self, features, target):
+        dataframe = pd.concat([features, target], axis=1)
+        if not os.path.exists(self.FOLDER_STORE_DATASET_NORMALIZED):
+            os.makedirs(self.FOLDER_STORE_DATASET_NORMALIZED)
+        file_name = self.dataset_file + "nomalized" + datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + ".xlsx"
+        path_save = os.path.join(self.FOLDER_STORE_DATASET_NORMALIZED, file_name)
+        dataframe.to_excel(path_save, index=False)
