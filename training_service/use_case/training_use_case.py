@@ -20,8 +20,10 @@ class TrainingUseCase:
             return None
         
         X, y = features
+        print("before_data_X:", type(X), " before_data_y: ", type(y))
         X = self.ml_model.encoder_categorical_columns(X)
-        y = self.ml_model.encoder_target(y)        
+        y = self.ml_model.encoder_target(y)
+        print("after_data_X:", type(X), " after_data_y: ", type(y))
         model = self.ml_model.get_model_type()
         ml_model_trained = self._train_without_overfitting_or_underfitting(model, X, y)
         self.repository.insert_ml_model(self.ml_model)

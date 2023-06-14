@@ -118,7 +118,7 @@ class MLModel:
         try:
             if not pd.api.types.is_numeric_dtype(target):
                 encoder = LabelEncoder()
-                return encoder.fit_transform(target)
+                return pd.Series(encoder.fit_transform(target), name= target.name)
             
             return target
         except Exception as error:
