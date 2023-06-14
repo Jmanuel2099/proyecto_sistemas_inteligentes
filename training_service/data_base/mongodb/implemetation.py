@@ -5,8 +5,8 @@ from training_service.domain.ml_model.ml_model_repository import MlModelReposito
 from training_service.domain.ml_model.ml_model import  MLModel
 
 class MongoImplementation(MlModelRepository):
-
     COLLECTION_NAME = "models"
+
     def __init__(self) -> None:
         pass 
 
@@ -43,7 +43,7 @@ class MongoImplementation(MlModelRepository):
                                trained_model_path= record["trained_model_path"],
                                dataset_file= record["dataset_file"])
             ml_models.append(ml_model)
-        
+
         return ml_models
     
     def get_ml_models_by_filter(self, limit:int, features:Union[List[str], bool]) -> List[MLModel]:
@@ -72,5 +72,5 @@ class MongoImplementation(MlModelRepository):
                                trained_model_path= record["trained_model_path"],
                                dataset_file= record["dataset_file"])
             ml_models.append(ml_model)
-        
+
         return ml_models

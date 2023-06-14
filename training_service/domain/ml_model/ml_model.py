@@ -12,7 +12,7 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.naive_bayes import GaussianNB
 from sklearn.model_selection import train_test_split, cross_val_predict, cross_validate, KFold
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
-import joblib
+# import joblib
 import pickle
 
 
@@ -156,41 +156,53 @@ class MLModel:
             raise error
 
     def hold_out(self, X, y):
-        # try:
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=(self.percent_tests / 100), random_state=6)
+        try:
+            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=(self.percent_tests / 100), random_state=6)
 
-        return X_train, X_test, y_train, y_test
-        # except Exception as error:
-        #     raise error
+            return X_train, X_test, y_train, y_test
+        except Exception as error:
+            raise error
 
     def fit_hold_out(self, model, x_train, x_test, y_train, y_test):
-        # try:
-        self._save_dataframe_to_training(features= pd.concat([x_train, x_test], axis=0), 
-                                        target= pd.concat([y_train, y_test], axis=0))
-        model.fit(x_train, y_train)
-        self._save_mlmodel_in_local(model)
-        y_predict= model.predict(x_test)
-        self._metrics(y_test=y_test, y_predict= y_predict)
+        try:
+            self._save_dataframe_to_training(features= pd.concat([x_train, x_test], axis=0), 
+                                            target= pd.concat([y_train, y_test], axis=0))
+            model.fit(x_train, y_train)
+            self._save_mlmodel_in_local(model)
+            if self.model_type == ModelTypeOptions.linear_regression.value:
+                self.accuracy = model.score(x_test, y_test)
+                self.precision = 0
+                self.recall = 0
+                self.f1 = 0
+            else:
+                y_predict= model.predict(x_test)
+                self._metrics(y_test=y_test, y_predict= y_predict)
 
-        return self.to_dict()
-        # except Exception as error:
-        #     raise error
+            return self.to_dict()
+        except Exception as error:
+            raise error
 
     def cross_validation(self, model, X, y):
-        # try:
-        self._save_dataframe_to_training(features=X, target=y)
-        kf = KFold(n_splits=self.number_folds, shuffle=True)
-        cv_results = cross_validate(model, X=X, y=y,scoring=['accuracy', 'precision', 'recall', 'f1'], cv=kf)
-        self.accuracy = cv_results['test_accuracy'].mean()
-        self.precision = cv_results['test_precision'].mean()
-        self.recall = cv_results['test_recall'].mean()
-        self.f1 = cv_results['test_f1'].mean()
-
-        model.fit(X, y)
-        self._save_mlmodel_in_local(model)
-        return self.to_dict()
-        # except Exception as error:
-        #     raise error
+        try:
+            self._save_dataframe_to_training(features=X, target=y)
+            kf = KFold(n_splits=self.number_folds, shuffle=True)
+            cv_results = cross_validate(model, X=X, y=y,scoring=['accuracy', 'precision', 'recall', 'f1'], cv=kf)
+            
+            model.fit(X, y)
+            self._save_mlmodel_in_local(model)
+            if self.model_type == ModelTypeOptions.linear_regression.value:
+                self.accuracy = model.score(X, y)
+                self.precision = 0
+                self.recall = 0
+                self.f1 = 0
+            else:
+                self.accuracy = cv_results['test_accuracy'].mean()
+                self.precision = cv_results['test_precision'].mean()
+                self.recall = cv_results['test_recall'].mean()
+                self.f1 = cv_results['test_f1'].mean()
+            return self.to_dict()
+        except Exception as error:
+            raise error
 
     def _save_mlmodel_in_local(self, model):
         try:
